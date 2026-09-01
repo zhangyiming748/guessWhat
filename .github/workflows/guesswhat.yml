@@ -1,0 +1,35 @@
+name: guesswhat
+
+on:
+  # 手动触发，可随时在 Actions 页面点击 Run workflow 启动
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    # 穷举耗时可能很长，最长允许 6 小时
+    timeout-minutes: 360
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Go
+        uses: actions/setup-go@v7
+        with:
+          go-version: stable
+
+      - name: Build
+        run: go build -o guesswhat .
+
+      - name: Run guesswhat
+        run: ./guesswhat
+
+      - name: Upload result artifact
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: guesswhat-result
+          path: result.txt
+          if-no-files-found: ignore
